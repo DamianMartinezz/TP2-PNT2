@@ -12,7 +12,7 @@
       >
       <b-form-input
           id="input"
-          v-model="Nombre"
+          v-model="nombre"
           type="text"
           placeholder="Ingrese su nombre"
           required
@@ -25,7 +25,7 @@
       >
       <b-form-input
           id="input"
-          v-model="Apellido"
+          v-model="apellido"
           type="text"
           placeholder="Ingrese su apellido"
           required
@@ -38,7 +38,7 @@
       >
       <b-form-input
           id="input"
-          v-model="Telefono"
+          v-model="telefono"
           type="text"
           placeholder="Ingrese un n° de teléfono"
           required
@@ -59,15 +59,16 @@
       </b-form-group>
       </div>
         <br>
-          <b-button @click="agregarSocio" variant="primary">Agregar</b-button>
+          <b-button @click="agregar" variant="primary">Agregar</b-button>
+          
     <div>
     <ul>
     <li v-for="(socio,index) in socios" v-bind:key="index">
-      {{socio.name}}
-      {{socio.surname}}
-      {{socio.phone}}
-      {{socio.document}}
-      <button @click="eliminarSocio(index)">Eliminar</button>
+      {{socio.nombre}}
+      {{socio.apellido}}
+      {{socio.Telefono}}
+      {{socio.DNI}}
+      <button @click="eliminar(socio.DNI)">Eliminar</button>
       <button @click="modificarSocio(index)">Modificar</button>
     </li>
     </ul>
@@ -77,34 +78,76 @@
 </template>
 
 <script>
+/*const database = require('../router/basededatos.js')*/
+//import {getAllUsers,createUser} from '../services/SociosService.js'
+import SociosService from '@/services/SociosService.js'
+
 export default {
   name: 'Socios',
   props: {
     msg1: String
   },
+  created: async function () {
+    try {
+      const rta = await SociosService.getSocios();
+      this.socios = rta.data;
+      console.log(rta.data);
+    } catch (error) {
+      alert("Se produjo un error");
+    }
+  },
   data: function(){
     return{
       socios:[],
-      Nombre:'',
-      Apellido:'',
-      Telefono: '',
+      nombre:'',
+      apellido:'',
+      telefono: '',
       dni: '',
     }
   },
   methods:{
-    agregarSocio: function(){
+    /*agregarSocio: function(){
     this.socios.push({
       name: this.Nombre,
       surname: this.Apellido,
       phone: this.Telefono,
       document: this.dni,
     })
+   
     console.log(this.socios);
-    },
-    eliminarSocio: function(socio){
+    },*/
+     
+ async agregar() {
+      try {
+        var obj = {
+          nombre: this.nombre,
+          apellido: this.apellido,
+          Telefono:this.telefono,
+          DNI:this.dni
+        };
+         
+         await SociosService.postSocios(obj); 
+                 
+     
+      } catch (error) {
+        console.log("Se produjo un error");
+      }
+    }, 
+    async eliminar(index) {
+            try {
+              const obj = {
+                DNI : index
+              }
+                await SociosService.deleteSocio(obj)          
+            } catch (error) {
+                alert('Se produjo un error')         
+            }
+        },
+
+     eliminarSocio: function(socio){
       console.log(socio)
     this.socios.splice(socio,1)
-    },
+    }, 
 
     modificarSocio: function(socio){
       /* let position = this.socios.map(socio => this.socios.indexOf(socio))*/
@@ -115,6 +158,8 @@ export default {
       this.socios[socio].document = this.dni
     }
   }
+
+
 }
 </script>
 
